@@ -1,0 +1,113 @@
+*** Settings ***
+
+Library		Collections
+Library		OdooLibrary.py  ${SERVER}
+Suite Setup	Setup Suite
+Suite Teardown	Teardown Suite
+Test Setup	Setup Test case
+
+*** Variables ***
+
+${SERVER}		http://localhost:8069
+${DB_NAME}		RobotSuiteDemoDb
+${TMPDB_NAME}		RobotTestDemoDb
+${SUPER_PASSWD}		admin
+${USER}			admin
+${USER_PASSWD}		admin
+@{MODULE_LIST}		base	web
+
+
+** Keywords ***
+
+Setup Suite
+    Create Database	${SUPER_PASSWD}  ${DB_NAME}  drop=True
+
+Teardown Suite
+    Drop Database	${SUPER_PASSWD}  ${DB_NAME}
+
+Setup Test Case
+    Reset Connection
+    Login		${USER}  ${USER_PASSWD}  ${DB_NAME}
+
+*** Test Cases ***
+
+Connect to Odoo Instance
+    [Setup]	NONE
+    Connect	${SERVER}
+    [Teardown]	NONE
+
+Create a New Database
+    [SETUP]		NONE
+    Create Database	${SUPER_PASSWD}  ${TMPDB_NAME}
+    [Teardown]		Drop Database  ${SUPER_PASSWD}  ${TMPDB_NAME}
+
+Delete a Database
+    [Setup]		NONE
+    Create Database	${SUPER_PASSWD}  ${TMPDB_NAME}
+    Drop Database	${SUPER_PASSWD}  ${TMPDB_NAME}
+    [Teardown]		NONE
+
+Create a New Database, Drop if Exists
+    [Setup]		NONE
+    Create Database	${SUPER_PASSWD}  ${TMPDB_NAME}  drop=False
+    Database Exists	${TMPDB_NAME}
+    Create Database	${SUPER_PASSWD}  ${TMPDB_NAME}  drop=True
+    [Teardown]		Drop Database  ${SUPER_PASSWD}  ${TMPDB_NAME}
+
+Check base Module is Installed
+    @{modules} =	Installed Modules
+    Should Contain	${modules}  base
+
+Check base and web Modules are installed
+    Modules Are Installed	${MODULE_LIST}
+
+Install a module
+    @{_M} 		Create List  note
+    Install Modules	${_M}
+    Modules Are Installed	${_M}
+
+Uninstall a module
+    @{_M} 		Create List  note
+    Install Modules	${_M}
+    Modules Are Installed	${_M}
+    Uninstall Modules	${_M}
+    @{modules} =	Installed Modules
+    :FOR	${mname}	IN	@{_M}
+    \	Should Not Contain	${modules}  ${mname}
+
+Search for Main Company
+    @{company_domain} =		Create List
+    @{company_ids} =		Search Records	res.company  ${company_domain}  limit=${None}  order=${None}  context=${None}
+    Length Should Be		${company_ids}  1
+    Ids Should Contain Value		${company_ids}  1
+
+Number of Companies Should be One
+    @{company_domain} =		Create List
+    ${count} =			Count Records	res.company  ${company_domain}
+    Should Be Equal As Integers		${count}  1
+
+Read Company Name
+    @{company_domain} =		Create List
+    @{company_ids} =		Search Records	res.company  ${company_domain}  limit=${None}  order=${None}  context=${None}
+    Length Should Be		${company_ids}  1
+    ${id} =			Get From List	${company_ids}  0
+    ${company_name} =		Read Record Field Value From Id		res.company  ${id}  name  limit=${None}  order=${None}
+    Should Not Be Empty		${company_name}
+
+Read Company Fields
+    @{company_domain} =		Create List
+    @{field_list} =		Create List
+    @{company_ids} =		Search Records	res.company  ${company_domain}  limit=${None}  order=${None}  context=${None}
+    Length Should Be		${company_ids}  1
+    ${id} =			Get From List	${company_ids}  0
+    ${fields} =			Read Record Fields Dictionary From Id		res.company  ${id}  ${field_list}  limit=${None}
+    Should Not Be Empty		${fields}
+    Dictionary Should Contain Key	${fields}  id
+    Dictionary Should Contain Key	${fields}  name
+
+Compare Record Field Values
+    @{company_domain} =		Create List
+    @{company_ids} =		Search Records	res.company  ${company_domain}  limit=${None}  order=${None}  context=${None}
+    Field Value Should Be Equal		res.company  ${company_ids}  name  Your Company
+    Field Value Should Not Be Equal	res.company  ${company_ids}  name  Invalid Company Name
+
