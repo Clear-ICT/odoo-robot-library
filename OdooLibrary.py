@@ -132,6 +132,25 @@ class OdooLibrary(object):
         )
         return res_ids
 
+    def create_new_record(self, model, values, context=None):
+        """Create a new record for ``model`` with ``values``."""
+
+        values = dict(values)
+        res = self.client.create(model, values, context=context)
+        return res
+
+    def unlink_record(self, model, ids, context=None):
+        """Remove records of ``model`` with id in ``ids``."""
+
+        if isinstance(ids, (long, int)):
+            ids = [ids]
+
+        assert isinstance(ids, (list, tuple)), \
+            "The argument ids is of type %s. It should be a list type." \
+            % (type(ids))
+
+        self.client.unlink(model, ids, context=context)
+
     def ids_should_contain_value(self, ids, value):
         """Returns true if value is in the list of ids"""
 
@@ -192,6 +211,9 @@ class OdooLibrary(object):
         """The value of field_name for all records of model with id in
         ids should be equal to value."""
 
+        if isinstance(ids, (long, int)):
+            ids = [ids]
+
         assert isinstance(ids, (list, tuple)), \
             "The argument ids is of type %s. It should be a list type." \
             % (type(ids))
@@ -207,6 +229,9 @@ class OdooLibrary(object):
     def field_value_should_not_be_equal(self, model, ids, field_name, value):
         """The value of field_name for all records of model with id in
         ids should *NOT* be equal to value."""
+
+        if isinstance(ids, (long, int)):
+            ids = [ids]
 
         assert isinstance(ids, (list, tuple)), \
             "The argument ids is of type %s. It should be a list type." \

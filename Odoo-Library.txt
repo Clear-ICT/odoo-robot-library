@@ -15,6 +15,7 @@ ${SUPER_PASSWD}		admin
 ${USER}			admin
 ${USER_PASSWD}		admin
 @{MODULE_LIST}		base	web
+&{JOHNDOE}		name=John Doe	email=johnd@example.com
 
 
 ** Keywords ***
@@ -110,4 +111,13 @@ Compare Record Field Values
     @{company_ids} =		Search Records	res.company  ${company_domain}  limit=${None}  order=${None}  context=${None}
     Field Value Should Be Equal		res.company  ${company_ids}  name  Your Company
     Field Value Should Not Be Equal	res.company  ${company_ids}  name  Invalid Company Name
+
+Create a New Record
+    @{partner_fields} =		Create List  name  email
+    @{partner_domain_1} =	Create List  email  =  ${JOHNDOE.email}
+    @{partner_domain} =		Create List  ${partner_domain_1}
+    ${partner_id} =		Create New Record  res.partner  ${JOHNDOE}
+    Field Value Should Be Equal		res.partner  ${partner_id}  name  ${JOHNDOE.name}
+    Field Value Should Be Equal		res.partner  ${partner_id}  email  ${JOHNDOE.email}
+    [Teardown]			Unlink Record  res.partner  ${partner_id}
 
