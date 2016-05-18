@@ -63,15 +63,15 @@ Check base and web Modules are installed
     Modules Are Installed	${MODULE_LIST}
 
 Install a module
-    @{_M} 		Create List  note
-    Install Modules	${_M}
+    @{_M} 		Create List  note  pad
+    Install Modules	@{_M}
     Modules Are Installed	${_M}
 
 Uninstall a module
-    @{_M} 		Create List  note
-    Install Modules	${_M}
+    @{_M} 		Create List  note  pad
+    Install Modules	@{_M}
     Modules Are Installed	${_M}
-    Uninstall Modules	${_M}
+    Uninstall Modules	@{_M}
     @{modules} =	Installed Modules
     :FOR	${mname}	IN	@{_M}
     \	Should Not Contain	${modules}  ${mname}

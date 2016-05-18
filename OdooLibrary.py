@@ -102,15 +102,15 @@ class OdooLibrary(object):
             assert modname in installed_modules, \
                 "Module %s is not installed" % (modname)
 
-    def install_modules(self, module_names):
+    def install_modules(self, *module_names):
         """Install all modules listed in module_names."""
 
-        self.client.install(module_names)
+        self.client.install(*module_names)
 
-    def uninstall_modules(self, module_names):
+    def uninstall_modules(self, *module_names):
         """Un-install all modules listed in module_names."""
 
-        self.client.uninstall(module_names)
+        self.client.uninstall(*module_names)
 
     def count_records(self, model, domain):
         """Filter all records for model according to domain and
